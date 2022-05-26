@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>JPDB Mini Project</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Student Details CRUD form</h2>
+        <form id="StudForm" method="post">
+            <div class="form-group">
+                <span><label for="StudId">Student ID:</label> <label id="StudIdMsg">
+                    </label></span>
+                <input type="text" class="form-control" name="StudId" id="StudId" placeholder="Enter Student ID"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="StudName">Student Name:</label>
+                <input type="text" class="form-control" id="StudName" placeholder="Enter Student Name" name="StudName">
+            </div>
+            <div class="form-group">
+                <label for="StudEmail">Email:</label>
+                <input type="email" class="form-control" id="StudEmail" placeholder="Enter Student Email"
+                    name="StudEmail">
+            </div>
+            <input type="button" class="btn btn-primary" id="StudSave" value="Save" onclick="saveStudent();">
+            <div class="form-group">
+                <span><label for="StudIdUpadte">Student ID to be Displayed:</label> <label id="StudIdMsg1">
+                    </label></span>
+                <input type="text" class="form-control" name="StudIdDisplay" id="StudIdDisplay"
+                    placeholder="Enter Student ID to be Displayed">
+            </div>
+            <input type="button" class="btn btn-primary" id="StudDisplay" value="Display" onclick="showData();">
+            <div class="form-group">
+                <span><label for="StudIdUpadte">Student ID to be Updated:</label> <label id="StudIdMsg2">
+                    </label></span>
+                <input type="text" class="form-control" name="StudIdUpdate" id="StudIdUpdate"
+                    placeholder="Enter Student ID to be updated">
+                <input type="email" class="form-control" name="StudEmailUpdate" id="StudEmailUpdate"
+                    placeholder="Enter New Student Email to be updated">
+            </div>
+            <input type="button" class="btn btn-primary" id="StudUpadte" value="Update" onclick="updateData();">
+            <div class="form-group">
+                <span><label for="StudIdUpadte">Student ID to be Deleted:</label> <label id="StudIdMsg3">
+                    </label></span>
+                <input type="text" class="form-control" name="StudIdDelete" id="StudIdDelete"
+                    placeholder="Enter Student ID to be Deleted">
+            </div>
+            <input type="button" class="btn btn-primary" id="StudDelete" value="Delete" onclick="deleteData();">
+        </form>
+    </div>
+    <script>
+        $("#StudId").focus();
+        function validateAndGetFormData() {
+            var StudIdVar = $("#StudId").val();
+            if (StudIdVar === "") {
+                alert("Student ID Required Value");
+                $("#StudId").focus();
+                return "";
+            }
+            var StudNameVar = $("#StudName").val();
+            if (StudNameVar === "") {
+                alert("Student Name is Required Value");
+                $("#StudName").focus();
+                return "";
+            }
+            var StudEmailVar = $("#StudEmail").val();
+            if (StudEmailVar === "") {
+                alert("Student Email is Required Value");
+                $("#StudEmail").focus();
+                return "";
+            }
+            var jsonStrObj = {
+                StudId: StudIdVar,
+                StudName: StudNameVar,
+                StudEmail: StudEmailVar,
+            };
+            return JSON.stringify(jsonStrObj);
+        }
+        // This method is used to create PUT Json request.
+        /*function createPUTRequest(connToken, jsonObj, dbName, relName) {
+            var putRequest = "{\n"
+                + "\"token\" : \""
+                + connToken
+                + "\","
+                + "\"dbName\": \""
+                + dbName
+                + "\",\n" + "\"cmd\" : \"PUT\",\n"
+                + "\"rel\" : \""
+                + relName + "\","
+                + "\"jsonStr\": \n"
+                + jsonObj
+                + "\n"
+                + "}";
+            return putRequest;
+        }*/
+        /*function executeCommandAtGivenBaseUrl(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+            $.post(url, reqString, function (result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function (result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+            return jsonObj;
+        }*/
+        function resetForm() {
+            $("#StudId").val("")
+            $("#StudName").val("");
+            $("#StudEmail").val("");
+            $("#StudId").focus();
+        }
+        function saveStudent() {
+            var jsonStr = validateAndGetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+            var putReqStr = createPUTRequest("90939003|-31949283569337477|90940886",
+                jsonStr, "Student_Data", "Stud-REL");
+            alert(putReqStr);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommandAtGivenBaseUrl(putReqStr, "http://api.login2explore.com:5577", "/api/iml");
+            alert(JSON.stringify(resultObj));
+            jQuery.ajaxSetup({ async: true });
+            resetForm();
+        }
+        function showData() {
+            var token = "90939003|-31949283569337477|90940886";
+            var dbname = "Student_Data";
+            var relationName = "Stud-REL";
+            var roll = document.getElementById("StudIdDisplay").value;
+
+            var jsonStr = {
+                StudId: roll
+            };
+            var reqString = createGETRequest(token, dbname, relationName, JSON.stringify(jsonStr));
+            alert(reqString);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommandAtGivenBaseUrl(reqString,
+                "http://api.login2explore.com:5577", "/api/irl");
+            jQuery.ajaxSetup({ async: true });
+
+            var data = JSON.stringify(resultObj);
+            alert(data);
+            resetForm();
+            //var res = data.split("\"");
+            //var mainContainer = document.getElementById("show");
+            //mainContainer.innerHTML = "Name : " + res[18].replace("\\","") + "      Email : " + res[10].replace("\\","")
+            //    + "     Course : " + res[22].replace("\\","") + "        Branch : " + res[14].replace("\\", "");           
+        }
+        function createREMOVERecordRequest(token, dbName, relName, reqId) {
+            var req = "{\n"
+                + "\"token\" : \""
+                + token
+                + "\","
+                + "\"dbName\": \""
+                + dbName
+                + "\",\n" + "\"cmd\" : \"REMOVE\",\n"
+                + "\"rel\" : \""
+                + relName
+                + "\",\n" + "\"record\":"
+                + reqId
+                + "\n"
+                + "\"jsonStr\":{ "
+                + "}"
+                + "}";
+            return req;
+        }
+        function deleteData() {
+            var token = "90939003|-31949283569337477|90940886";
+            var dbname = "Student_Data";
+            var relationName = "Stud-REL";
+            var roll = parseInt(document.getElementById("StudIdDelete").value);
+
+            var reqString = createREMOVERecordRequest(token, dbname, relationName, roll);
+            alert(reqString);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommandAtGivenBaseUrl(reqString,
+                "http://api.login2explore.com:5577", "/api/iml");
+            jQuery.ajaxSetup({ async: true });
+            alert(JSON.stringify(resultObj));
+
+        }
+        function updateData() {
+            var token = "90939003|-31949283569337477|90940886";
+            var dbname = "Student_Data";
+            var relationName = "Stud-REL";
+            var roll = parseInt(document.getElementById("StudIdUpdate").value);
+            var email = document.getElementById("StudEmailUpdate").value;
+
+            var jsonObj = {
+                StudEmail: email,
+            };
+            var reqString = createUPDATERecordRequest(token, JSON.stringify(jsonObj), dbname, relationName, roll);
+            alert(reqString);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommandAtGivenBaseUrl(reqString,
+                "http://api.login2explore.com:5577", "/api/iml");
+            jQuery.ajaxSetup({ async: true });
+            alert(JSON.stringify(resultObj));
+
+        }
+    </script>
+</body>
+
+</html>
